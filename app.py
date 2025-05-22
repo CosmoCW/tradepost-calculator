@@ -38,7 +38,7 @@ distancias_gilead = {
 
 # Función para calcular la puntuación total con bonificaciones
 def calcular_puntuacion(tradepost, porcentaje, referencia, bartering1, bartering2, plunder):
-    base = 35000 * (porcentaje / 100)
+    base = 35000 * (porcentaje / 100)  # <<< Ahora acepta >100% (ej: 500% = 35k * 5)
     
     # Obtener distancia según referencia
     if referencia == "Dras Ashar":
@@ -63,7 +63,7 @@ st.title("Calculadora de Puntuación para TradePosts")
 
 st.markdown("""
 Esta aplicación calcula la puntuación de cada TradePost basada en:
-- **Porcentaje del TradePost** (100% = 35,000 puntos).
+- **Porcentaje del TradePost** (100% = 35,000 puntos, **hasta 500%**).  # <<< Actualizado
 - **Distancia desde Dras Ashar o Gilead** (multiplicada por 8.5).
 - **Bonificaciones acumulables**: Bartering 1 (+5%), Bartering 2 (+10%), Plunder (+10%).
 """)
@@ -77,11 +77,17 @@ bartering1 = st.checkbox("Bartering 1 (+5%)")
 bartering2 = st.checkbox("Bartering 2 (+10%)")
 plunder = st.checkbox("Plunder (+10%)")
 
-# Ingresar porcentajes para cada TradePost
+# Ingresar porcentajes para cada TradePost (ahora hasta 500%)  <<< Cambio clave
 st.header("Ingresar Porcentajes")
 porcentajes = {}
 for tp in tradeposts:
-    porcentajes[tp] = st.slider(f"Porcentaje para {tp}", 0, 100, 50)
+    porcentajes[tp] = st.number_input(  # <<< Usamos number_input en lugar de slider
+        f"Porcentaje para {tp} (0-500%)",
+        min_value=0,
+        max_value=500,  # <<< Límite aumentado a 500%
+        value=50,  # Valor por defecto
+        step=1
+    )
 
 # Calcular puntuaciones
 puntuaciones = {}
