@@ -100,24 +100,33 @@ with tab1:
 with tab2:
     st.header("Análisis de Costes")
     
-    # Input de precios
-    st.subheader("Precios de Ingredientes")
+    # Input de precios (MEJORADO)
+    st.subheader("💰 Ingresa los precios de los ingredientes:")
+    
+    # Organizar ingredientes en 3 columnas para mejor visualización
+    col1, col2, col3 = st.columns(3)
     prices = {}
-    cols = st.columns(4)
-    for i, ing in enumerate(all_ingredients):
-        with cols[i % 4]:
-            prices[ing] = st.number_input(f"{ing}", min_value=0, value=10, key=f"price_{ing}")
     
-    # Calcular costes
-    costs = {pack: calcular_coste_tradepack(pack, prices) for pack in tradepacks}
-    df = pd.DataFrame(sorted(costs.items(), key=lambda x: x[1]), columns=["TradePack", "Coste Total"])
+    for i, ingredient in enumerate(all_ingredients):
+        with col1 if i % 3 == 0 else col2 if i % 3 == 1 else col3:
+            prices[ingredient] = st.number_input(
+                f"Precio de {ingredient}:",
+                min_value=0,
+                value=10,  # Valor por defecto
+                step=1,
+                key=f"price_{ingredient}"
+            )
     
-    # Mostrar resultados
-    st.subheader("TradePacks por Coste (de menor a mayor)")
-    st.dataframe(df, hide_index=True, use_container_width=True)
-    
-    # Detalle de un tradepack
-    selected = st.selectbox("Detalles del TradePack:", list(tradepacks.keys()))
-    st.write(f"**Ingredientes para {selected}:**")
-    for ing, qty in tradepacks[selected].items():
-        st.write(f"- {ing}: {qty} × {prices.get(ing, 0)} = {qty * prices.get(ing, 0)}")
+    # Botón para calcular (evita cálculos automáticos)
+    if st.button("🔄 Calcular Costes"):
+        costs = {pack: calcular_coste_tradepack(pack, prices) for pack in tradepacks}
+        df = pd.DataFrame(sorted(costs.items(), key=lambda x: x[1]), columns=["TradePack", "Coste Total"])
+        
+        st.subheader("📊 Resultados (de más barato a más caro):")
+        st.dataframe(df, use_container_width=True)
+        
+        # Detalle del tradepack seleccionado
+        selected = st.selectbox("🔍 Ver detalles:", list(tradepacks.keys()))
+        st.write(f"**🧾 Ingredientes para {selected}:**")
+        for ing, qty in tradepacks[selected].items():
+            st.write(f"- {ing}: {qty} unidades × {prices.get(ing, 0)} = {qty * prices.get(ing, 0)}")
